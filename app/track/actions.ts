@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function lookupTicket(formData: FormData) {
   const ticketNumber = formData.get("ticketNumber") as string;
@@ -11,9 +11,12 @@ export async function lookupTicket(formData: FormData) {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Query ticket with associated customer matching the phone number
+    const cleanTicketNumber = ticketNumber.trim().toUpperCase();
+    const cleanInputPhone = phone.trim().replace(/[\s\-\(\)\+]/g, "");
+
+    // Query ticket with associated customer
     const { data: ticket, error } = await supabase
       .from("tickets")
       .select(`
@@ -24,14 +27,27 @@ export async function lookupTicket(formData: FormData) {
         created_at,
         updated_at,
         technician_notes,
-        customers!inner ( phone )
+        customers ( phone )
       `)
-      .eq("ticket_number", ticketNumber.trim().toUpperCase())
-      .eq("customers.phone", phone.trim())
-      .single();
+      .eq("ticket_number", cleanTicketNumber)
+      .maybeSingle();
 
     if (error || !ticket) {
-      return { success: false, error: "No matching ticket found with that mobile number." };
+      return { success: false, error: "No ticket found with that ticket number." };
+    }
+
+    const customerPhone = (ticket.customers as any)?.phone || "";
+    const cleanCustomerPhone = customerPhone.replace(/[\s\-\(\)\+]/g, "");
+
+    // Compare phones (exact match or last 10 digits match)
+    const matchesPhone = 
+      cleanCustomerPhone === cleanInputPhone ||
+      (cleanCustomerPhone.length >= 10 && 
+       cleanInputPhone.length >= 10 && 
+       cleanCustomerPhone.slice(-10) === cleanInputPhone.slice(-10));
+
+    if (!matchesPhone) {
+      return { success: false, error: "The mobile number does not match our records for this ticket." };
     }
 
     return { 

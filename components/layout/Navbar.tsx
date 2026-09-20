@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { technicianConfig } from "@/lib/config/technician";
-import { Wrench, Menu } from "lucide-react";
+import { Wrench, Menu, Lock } from "lucide-react";
 
 export default function Navbar() {
   return (
@@ -22,7 +22,7 @@ export default function Navbar() {
               </div>
             </Link>
           </div>
-          <div className="hidden sm:flex sm:items-center sm:space-x-8">
+          <div className="hidden sm:flex sm:items-center sm:space-x-6">
             <Link href="/" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors">
               Home
             </Link>
@@ -35,8 +35,22 @@ export default function Navbar() {
             <Link href="/request" className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
               Request Service
             </Link>
+            <Link 
+              href="/admin/dashboard" 
+              className="text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            >
+              <Lock className="w-3.5 h-3.5 text-slate-500" />
+              Admin Portal
+            </Link>
           </div>
-          <div className="flex items-center sm:hidden">
+          <div className="flex items-center gap-2 sm:hidden">
+            <Link 
+              href="/admin/dashboard" 
+              className="text-slate-600 border border-slate-200 bg-slate-50 p-2 rounded-md text-xs font-semibold flex items-center"
+              title="Admin Portal"
+            >
+              <Lock className="w-4 h-4 text-slate-600" />
+            </Link>
             <button type="button" className="text-gray-500 hover:text-gray-700 p-2">
               <Menu className="h-6 w-6" />
             </button>
